@@ -1,0 +1,65 @@
+<!-- <canvas id="my-canvas" width="80" height="210"></canvas> -->
+<canvas id="canvas" width="300" height="300"></canvas>
+
+<a id="dl" download="canvas.png" href="#">Descargar image</a>
+
+<script>
+    var canvas = document.getElementById('canvas');
+    const getContext = () => canvas.getContext('2d');
+
+    // It's better to use async image loading.
+    const loadImage = url => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error(`load ${url} fail`));
+            img.src = url;
+            // img.crossOrigin = "anonymous";
+        });
+    };
+
+    // Here, I created a function to draw image.
+    const depict = options => {
+        const ctx = getContext();
+        // And this is the key to this solution
+        // Always remember to make a copy of original object, then it just works :)
+        const myOptions = Object.assign({}, options);
+        return loadImage(myOptions.uri).then(img => {
+            ctx.drawImage(img, myOptions.x, myOptions.y, myOptions.sw, myOptions.sh);
+        });
+    };
+
+    const imgs = [{
+        uri: 'photo.png',
+        x: 0,
+        y: 0,
+        sw: 300,
+        sh: 300
+    }, {
+        uri: 'marco.png',
+        x: 0,
+        y: 0,
+        sw: 300,
+        sh: 300
+    }];
+
+    imgs.forEach(depict);
+
+    function dlCanvas() {
+        var dt = canvas.toDataURL('image/png');
+        /* Change MIME type to trick the browser to downlaod the file instead of displaying it */
+        dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+
+        /* In addition to <a>'s "download" attribute, you can define HTTP-style headers */
+        dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=canvas.png');
+
+        this.href = dt;
+    };
+    document.getElementById("dl").addEventListener('click', dlCanvas, false);
+</script>
+
+<style>
+    #cnasdv {
+        background: #7F7F7F;
+    }
+</style>
